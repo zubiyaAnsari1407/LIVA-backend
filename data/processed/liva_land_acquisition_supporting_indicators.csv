@@ -1,0 +1,36 @@
+indicator_group,location,period,metric_1_name,metric_1_value,metric_2_name,metric_2_value,metric_3_name,metric_3_value,source_file,is_demo,data_role
+land_acquisition_cost,Paonta Sahib to Mednipur,Package-I,length_km,18.7,civil_cost_cr,395.61,land_acquisition_cost_cr,84.74,Dehradun-RS_Session_257_AU_1225_A_and_B.csv,False,supporting_indicator_only
+land_acquisition_cost,Mednipur-Ballupur (Dehradun),Package-II,length_km,26.1,civil_cost_cr,475.79,land_acquisition_cost_cr,528.65,Dehradun-RS_Session_257_AU_1225_A_and_B.csv,False,supporting_indicator_only
+historical_land_acquisition,Not specified in CSV,2013-14,area_acquired_ha,8655.0,expenditure_cr,7794,average_cost_cr,0.9,NN-RS_Session_247_AU_2822.csv,False,supporting_indicator_only
+historical_land_acquisition,Not specified in CSV,2014-15,area_acquired_ha,6733.0,expenditure_cr,9097,average_cost_cr,1.35,NN-RS_Session_247_AU_2822.csv,False,supporting_indicator_only
+historical_land_acquisition,Not specified in CSV,2015-16,area_acquired_ha,9287.0,expenditure_cr,21000,average_cost_cr,2.26,NN-RS_Session_247_AU_2822.csv,False,supporting_indicator_only
+historical_land_acquisition,Not specified in CSV,2016-17,area_acquired_ha,7491.0,expenditure_cr,19700,average_cost_cr,2.63,NN-RS_Session_247_AU_2822.csv,False,supporting_indicator_only
+historical_land_acquisition,Not specified in CSV,2017-18,area_acquired_ha,9494.0,expenditure_cr,29281,average_cost_cr,3.08,NN-RS_Session_247_AU_2822.csv,False,supporting_indicator_only
+rehabilitation_resettlement,Not specified in CSV,2020-21,project_affected_people_shifted,1084.0,,,,,RS_Session_259_AU_3560_A.csv,False,supporting_indicator_only
+rehabilitation_resettlement,Not specified in CSV,2021-22,project_affected_people_shifted,2687.0,,,,,RS_Session_259_AU_3560_A.csv,False,supporting_indicator_only
+rehabilitation_resettlement,Not specified in CSV,2022-23 (till Jan 23),project_affected_people_shifted,1732.0,,,,,RS_Session_259_AU_3560_A.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Punjab,2017-18,combined_spend_cr,3945.0,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Punjab,2018-19,combined_spend_cr,3784.41,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Punjab,2019-20,combined_spend_cr,3660.07,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Punjab,2020-21,combined_spend_cr,3433.18,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Punjab,2021-22,combined_spend_cr,3960.92,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Haryana,2017-18,combined_spend_cr,4691.88,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Haryana,2018-19,combined_spend_cr,3300.76,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Haryana,2019-20,combined_spend_cr,2747.94,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Haryana,2020-21,combined_spend_cr,2901.08,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Haryana,2021-22,combined_spend_cr,3557.02,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Rajasthan,2017-18,combined_spend_cr,3531.66,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Rajasthan,2018-19,combined_spend_cr,4890.15,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Rajasthan,2019-20,combined_spend_cr,7014.06,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Rajasthan,2020-21,combined_spend_cr,6746.41,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Rajasthan,2021-22,combined_spend_cr,11299.32,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Madhya Pradesh,2017-18,combined_spend_cr,3396.0,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Madhya Pradesh,2018-19,combined_spend_cr,5603.0,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Madhya Pradesh,2019-20,combined_spend_cr,6035.13,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Madhya Pradesh,2020-21,combined_spend_cr,7064.43,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Madhya Pradesh,2021-22,combined_spend_cr,8439.0,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Chhattisgarh,2017-18,combined_spend_cr,2323.74,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Chhattisgarh,2018-19,combined_spend_cr,2362.14,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Chhattisgarh,2019-20,combined_spend_cr,1466.77,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Chhattisgarh,2020-21,combined_spend_cr,2018.65,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only
+state_highway_la_and_construction_spend,Chhattisgarh,2021-22,combined_spend_cr,1737.6,,,,,Punj-Harya-Rajas-MP-Chattis-RS_Session_259_AU_3289_2.csv,False,supporting_indicator_only

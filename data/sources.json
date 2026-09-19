@@ -1,0 +1,43 @@
+{
+  "project": "LIVA - Land Acquisition Delay Analytics",
+  "policy": "Government and verified public-authority data only",
+  "sources": [
+    {
+      "id": "railway_land_acquisition_delay_2025",
+      "name": "Project-wise Details of Some Major Projects Delayed Due to Land Acquisition Across Indian Railways Network of Tamil Nadu",
+      "authority": "Rajya Sabha",
+      "platform": "Open Government Data Platform India",
+      "reference_date": "2025-03-28",
+      "published_date": "2025-07-17",
+      "official_url": "https://tn.data.gov.in/resource/project-wise-details-some-major-projects-delayed-due-land-acquisition-across-indian",
+      "usage": "Land-acquisition delay examples and project-level delay analysis",
+      "is_official": true,
+      "is_training_approved": true
+    },
+    {
+      "id": "dilrmp_progress",
+      "name": "Digital India Land Records Modernization Programme Progress",
+      "authority": "Department of Land Resources, Ministry of Rural Development",
+      "platform": "Open Government Data Platform India",
+      "published_date": "2023-09-25",
+      "updated_date": "2025-02-18",
+      "official_url": "https://www.data.gov.in/catalog/digital-india-land-records-modernization-programme-progress",
+      "usage": "Land-record digitisation and registration context/features",
+      "is_official": true,
+      "is_training_approved": true
+    },
+
+    {
+  "id": "mospi_paimana_central_projects_2026",
+  "name": "Central Sector Infrastructure Projects - Monthly Flash Report",
+  "authority": "Ministry of Statistics and Programme Implementation",
+  "department": "Infrastructure and Project Monitoring Division",
+  "platform": "PAIMANA",
+  "reference_date": "2026-03",
+  "official_url": "https://ipm.mospi.gov.in/",
+  "usage": "Training and validating infrastructure project delay-risk models using project schedule, progress and cost indicators",
+  "is_official": true,
+  "is_training_approved": true
+  }
+  ]
+}

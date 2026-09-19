@@ -1,0 +1,16 @@
+state,project_name,total_land_ha,land_acquired_ha,balance_land_ha,source_file,source_type,acquired_pct,pending_land_pct,is_demo,data_role
+Kerala,Angamali - Sabarimala new line (111 Km),416.0,24.4,391.6,Kerala-RS_Session_267_AU_594_A_to_D.csv,Rajya Sabha extract,5.87,94.13,False,land_acquisition_risk_evidence
+Kerala,Ernakulam - Kumbalam Patch Doubling (8 Km),4.2,1.59,2.61,Kerala-RS_Session_267_AU_594_A_to_D.csv,Rajya Sabha extract,37.86,62.14,False,land_acquisition_risk_evidence
+Kerala,Kumbalam - Turavur Patch Doubling (16 Km),10.3,5.7,4.6,Kerala-RS_Session_267_AU_594_A_to_D.csv,Rajya Sabha extract,55.34,44.66,False,land_acquisition_risk_evidence
+Kerala,Trivandrum - Kanyakumari Doubling (87 Km),41.0,33.2,7.8,Kerala-RS_Session_267_AU_594_A_to_D.csv,Rajya Sabha extract,80.98,19.02,False,land_acquisition_risk_evidence
+Kerala,Shoranur - Vallathol Doubling (10 Km),4.77,0.0,4.77,Kerala-RS_Session_267_AU_594_A_to_D.csv,Rajya Sabha extract,0.0,100.0,False,land_acquisition_risk_evidence
+Punjab,Firozpur-Patti (26 Km),166.0,0.0,166.0,Punjab2-RS_Session_267_AU_3961_A_to_D.iii_ (1).csv,Rajya Sabha extract,0.0,100.0,False,land_acquisition_risk_evidence
+Punjab,Nangal Dam-Talwara New Line (84 Km),120.0,38.0,82.0,Punjab2-RS_Session_267_AU_3961_A_to_D.iii_ (1).csv,Rajya Sabha extract,31.67,68.33,False,land_acquisition_risk_evidence
+Punjab,Chord Line between Alal-Himtana bypassing Dhuri Junction (13 km),20.0,0.0,20.0,Punjab2-RS_Session_267_AU_3961_A_to_D.iii_ (1).csv,Rajya Sabha extract,0.0,100.0,False,land_acquisition_risk_evidence
+West Bengal,Nabadwipghat-Nabadwipdham New Line (10 Km),106.86,0.17,106.69,West_Bengal-RS_Session_266_AU_2988_A_to_B_ii.csv,Rajya Sabha extract,0.16,99.84,False,land_acquisition_risk_evidence
+West Bengal,Chandaneshwar-Jaleswar new line (41 Km),158.0,0.0,158.0,West_Bengal-RS_Session_266_AU_2988_A_to_B_ii.csv,Rajya Sabha extract,0.0,100.0,False,land_acquisition_risk_evidence
+West Bengal,Naihati-Ranaghat-3rd line (36 Km),87.83,0.09,87.74,West_Bengal-RS_Session_266_AU_2988_A_to_B_ii.csv,Rajya Sabha extract,0.1,99.9,False,land_acquisition_risk_evidence
+West Bengal,Balurghat-Hilli new line (30 km),156.38,67.38,88.0,West_Bengal-RS_Session_266_AU_2988_A_to_B_ii.csv,Rajya Sabha extract,43.09,56.27,False,land_acquisition_risk_evidence
+West Bengal,Byepass at Sainthia (5 Km) and Sitarampur (7 Km),22.28,2.22,20.06,West_Bengal-RS_Session_266_AU_2988_A_to_B_ii.csv,Rajya Sabha extract,9.96,90.04,False,land_acquisition_risk_evidence
+Andhra Pradesh,Visakhapatnam,7324.7,3891.48,3433.22,AP-RS_249_AS79.csv,Rajya Sabha extract,53.13,46.87,False,land_acquisition_risk_evidence
+Andhra Pradesh,Chittoor,24191.29,928.38,23262.91,AP-RS_249_AS79.csv,Rajya Sabha extract,3.84,96.16,False,land_acquisition_risk_evidence
