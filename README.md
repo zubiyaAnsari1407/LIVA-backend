@@ -168,15 +168,22 @@ These endpoints verify API and MongoDB connectivity.
 Backend
 
 Python 3.12
+
 FastAPI
+
 Uvicorn
+
 PyMongo
 
 AI / ML
 
+
 Scikit-learn
+
 SHAP
+
 Pandas
+
 NumPy
 
 Database
