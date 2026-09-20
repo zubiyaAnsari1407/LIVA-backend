@@ -52,20 +52,26 @@ The LIVA backend powers:
 
 ## Architecture
 
-React / TypeScript Frontend
+React /  TypeScript Frontend
+
             ↓
         REST APIs
             ↓
         FastAPI
      ┌──────┼────────┐
      ↓      ↓        ↓
+     
  Workflow   ML      GIS
+ 
  Engine    Engine   Services
+ 
      └──────┼────────┘
             ↓
       MongoDB Atlas
+      
             ↓
       Persistent Data
+      
 
 Project Images → Cloudinary
 
@@ -150,7 +156,9 @@ Interactive endpoint documentation is available through FastAPI Swagger:
 https://liva-backend-hgyx.onrender.com/docs
 
 ## Health Checks
+
 GET /api/health
+
 GET /api/health/database
 
 These endpoints verify API and MongoDB connectivity.
