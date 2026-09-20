@@ -128,13 +128,21 @@ PNG
 WEBP
 
 ## Main API Areas
+
 /api/projects
+
 /api/parcels
+
 /api/workflow
+
 /api/risk
+
 /api/simulation
+
 /api/gis
+
 /api/geocode
+
 /api/health
 
 Interactive endpoint documentation is available through FastAPI Swagger:
