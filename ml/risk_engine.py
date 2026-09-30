@@ -109,14 +109,13 @@ def calculate_baseline_score(
     # Maximum: 15
     # --------------------------------------------------------
 
-    pending_parcel_ratio = _ratio(
-        features.pending_parcels,
-        total_parcels,
-    )
-
-    parcel_score = (
-        pending_parcel_ratio * 15
-    )
+    parcel_score = 0.0
+    if features.has_feature("pending_parcels") and features.has_feature("total_parcels"):
+        pending_parcel_ratio = _ratio(
+            features.pending_parcels,
+            total_parcels,
+        )
+        parcel_score = pending_parcel_ratio * 15
 
     # --------------------------------------------------------
     # 2. Ownership issues
@@ -124,14 +123,8 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     ownership_score = _cap(
-        (
-            features.ownership_disputes
-            * 2.0
-        )
-        + (
-            features.ownership_pending
-            * 0.75
-        ),
+        (features.ownership_disputes * 2.0 if features.has_feature("ownership_disputes") else 0)
+        + (features.ownership_pending * 0.75 if features.has_feature("ownership_pending") else 0),
         15,
     )
 
@@ -140,7 +133,9 @@ def calculate_baseline_score(
     # Maximum: 10
     # --------------------------------------------------------
 
-    if total_parcels > 0:
+    if not features.has_feature("survey_pending"):
+        survey_score = 0.0
+    elif total_parcels > 0 and features.has_feature("total_parcels"):
 
         survey_ratio = _ratio(
             features.survey_pending,
@@ -164,14 +159,8 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     litigation_score = _cap(
-        (
-            features.active_litigation_cases
-            * 2.5
-        )
-        + (
-            features.high_risk_litigation_cases
-            * 2.5
-        ),
+        (features.active_litigation_cases * 2.5 if features.has_feature("active_litigation_cases") else 0)
+        + (features.high_risk_litigation_cases * 2.5 if features.has_feature("high_risk_litigation_cases") else 0),
         20,
     )
 
@@ -181,8 +170,7 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     document_score = _cap(
-        features.missing_documents
-        * 1.5,
+        features.missing_documents * 1.5 if features.has_feature("missing_documents") else 0,
         10,
     )
 
@@ -192,8 +180,7 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     compensation_score = _cap(
-        features.compensation_pending
-        * 0.75,
+        features.compensation_pending * 0.75 if features.has_feature("compensation_pending") else 0,
         8,
     )
 
@@ -203,8 +190,7 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     approval_score = _cap(
-        features.pending_approvals
-        * 1.5,
+        features.pending_approvals * 1.5 if features.has_feature("pending_approvals") else 0,
         10,
     )
 
@@ -216,8 +202,7 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     overdue_days_score = _cap(
-        features.max_overdue_days
-        / 6,
+        features.max_overdue_days / 6 if features.has_feature("max_overdue_days") else 0,
         10,
     )
 
@@ -227,11 +212,8 @@ def calculate_baseline_score(
     # --------------------------------------------------------
 
     action_score = _cap(
-        features.overdue_actions
-        + (
-            features.high_priority_open_actions
-            * 0.5
-        ),
+        (features.overdue_actions if features.has_feature("overdue_actions") else 0)
+        + (features.high_priority_open_actions * 0.5 if features.has_feature("high_priority_open_actions") else 0),
         7,
     )
 
@@ -242,7 +224,7 @@ def calculate_baseline_score(
 
     progress_score = 0.0
 
-    if features.completion_percentage < 50:
+    if features.has_feature("completion_percentage") and features.completion_percentage < 50:
 
         progress_score = _cap(
             (

@@ -22,7 +22,7 @@ def build_recommendations(
     # Ownership
     # ========================================================
 
-    if features.ownership_disputes > 0:
+    if features.has_feature("ownership_disputes") and features.ownership_disputes > 0:
         recommendations.append(
             RecommendedAction(
                 code="RESOLVE_OWNERSHIP_DISPUTES",
@@ -42,7 +42,7 @@ def build_recommendations(
             )
         )
 
-    elif features.ownership_pending > 0:
+    elif features.has_feature("ownership_pending") and features.ownership_pending > 0:
         recommendations.append(
             RecommendedAction(
                 code="COMPLETE_OWNERSHIP_REVIEW",
@@ -61,7 +61,7 @@ def build_recommendations(
     # Survey
     # ========================================================
 
-    if features.survey_pending > 0:
+    if features.has_feature("survey_pending") and features.survey_pending > 0:
         recommendations.append(
             RecommendedAction(
                 code="SCHEDULE_PENDING_SURVEYS",
@@ -84,7 +84,7 @@ def build_recommendations(
     # Litigation
     # ========================================================
 
-    if features.active_litigation_cases > 0:
+    if features.has_feature("active_litigation_cases") and features.active_litigation_cases > 0:
         recommendations.append(
             RecommendedAction(
                 code="LEGAL_CASE_REVIEW",
@@ -96,7 +96,7 @@ def build_recommendations(
                 ),
                 priority=(
                     "CRITICAL"
-                    if features.high_risk_litigation_cases > 0
+                    if features.has_feature("high_risk_litigation_cases") and features.high_risk_litigation_cases > 0
                     else "HIGH"
                 ),
                 target_days=5,
@@ -108,7 +108,7 @@ def build_recommendations(
     # Missing documents
     # ========================================================
 
-    if features.missing_documents > 0:
+    if features.has_feature("missing_documents") and features.missing_documents > 0:
         recommendations.append(
             RecommendedAction(
                 code="COLLECT_MISSING_DOCUMENTS",
@@ -132,7 +132,7 @@ def build_recommendations(
     # Compensation
     # ========================================================
 
-    if features.compensation_pending > 0:
+    if features.has_feature("compensation_pending") and features.compensation_pending > 0:
         recommendations.append(
             RecommendedAction(
                 code="PROCESS_COMPENSATION",
@@ -156,7 +156,7 @@ def build_recommendations(
     # Approvals
     # ========================================================
 
-    if features.pending_approvals > 0:
+    if features.has_feature("pending_approvals") and features.pending_approvals > 0:
         recommendations.append(
             RecommendedAction(
                 code="ESCALATE_APPROVALS",
@@ -167,7 +167,7 @@ def build_recommendations(
                 ),
                 priority=(
                     "HIGH"
-                    if features.max_overdue_days >= 15
+                    if features.has_feature("max_overdue_days") and features.max_overdue_days >= 15
                     else "MEDIUM"
                 ),
                 target_days=5,
@@ -179,7 +179,7 @@ def build_recommendations(
     # Overdue workflow
     # ========================================================
 
-    if features.max_overdue_days >= 15:
+    if features.has_feature("max_overdue_days") and features.max_overdue_days >= 15:
         recommendations.append(
             RecommendedAction(
                 code="OVERDUE_WORKFLOW_ESCALATION",
@@ -203,18 +203,29 @@ def build_recommendations(
     # Action Center
     # ========================================================
 
+    overdue_actions_available = features.has_feature("overdue_actions")
+    high_priority_actions_available = features.has_feature("high_priority_open_actions")
     if (
-        features.overdue_actions > 0
-        or features.high_priority_open_actions > 0
+        (overdue_actions_available and features.overdue_actions > 0)
+        or (high_priority_actions_available and features.high_priority_open_actions > 0)
     ):
+        overdue_actions = features.overdue_actions if overdue_actions_available else 0
+        high_priority_actions = (
+            features.high_priority_open_actions if high_priority_actions_available else 0
+        )
         recommendations.append(
             RecommendedAction(
                 code="CLEAR_ACTION_BACKLOG",
                 title="Clear critical Action Center backlog",
                 description=(
-                    f"{features.overdue_actions} actions are overdue and "
-                    f"{features.high_priority_open_actions} high-priority "
-                    "actions remain open."
+                    (
+                        f"{overdue_actions} actions are overdue and "
+                        f"{high_priority_actions} high-priority actions remain open."
+                        if overdue_actions_available and high_priority_actions_available
+                        else f"{overdue_actions} actions are overdue."
+                        if overdue_actions_available
+                        else f"{high_priority_actions} high-priority actions remain open."
+                    )
                 ),
                 priority=(
                     "CRITICAL"
@@ -231,7 +242,9 @@ def build_recommendations(
     # ========================================================
 
     if (
-        features.total_parcels > 0
+        features.has_feature("total_parcels")
+        and features.has_feature("pending_parcels")
+        and features.total_parcels > 0
         and features.pending_parcels > 0
     ):
         pending_ratio = (

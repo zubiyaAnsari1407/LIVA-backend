@@ -217,6 +217,9 @@ def get_simulation_history(
 
             records.append(
                 SimulationHistoryItem(
+                    current_prediction=document.get("current_prediction"),
+                    simulated_prediction=document.get("simulated_prediction"),
+                    summary=document.get("summary"),
                     simulation_id=str(
                         document["_id"]
                     ),

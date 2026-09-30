@@ -18,8 +18,14 @@ from risk_routes import router as risk_router
 from simulation_routes import router as simulation_router
 from geocode_routes import router as geocode_router
 from gis_routes import router as gis_router
-
-
+from liva_documents import router as liva_documents_router
+from liva_grievances import router as liva_grievances_router
+from liva_projects import router as liva_projects_router
+from liva_registration import router as liva_registration_router
+from liva_risk_assessments import router as liva_risk_assessments_router
+from pydantic import BaseModel
+from ai_assistant import ask_liva_ai
+from ai_assistant import ask_liva_ai
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -66,7 +72,7 @@ app.add_middleware(
     allow_origins=get_allowed_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "X-Liva-Role"],
 )
 
 
@@ -82,6 +88,11 @@ register_workflows(app)
 app.include_router(simulation_router)
 app.include_router(geocode_router)
 app.include_router(gis_router)
+app.include_router(liva_registration_router)
+app.include_router(liva_documents_router)
+app.include_router(liva_grievances_router)
+app.include_router(liva_projects_router)
+app.include_router(liva_risk_assessments_router)
 
 
 @app.get("/")
@@ -121,3 +132,34 @@ def database_health():
                 "message": "MongoDB connection failed.",
             },
         )
+
+    
+class AIChatRequest(BaseModel):
+    message: str
+    project_id: str | None = None
+    project: dict | None = None
+    risk: dict | None = None
+
+class AIChatResponse(BaseModel):
+    answer: str
+
+class AIChatResponse(BaseModel):
+    answer: str
+
+@app.post(
+    "/api/ai/chat",
+    response_model=AIChatResponse,
+)
+def ai_chat(
+    request: AIChatRequest,
+):
+    answer = ask_liva_ai(
+        message=request.message,
+        project_id=request.project_id,
+        project=request.project,
+        risk=request.risk,
+    )
+
+    return AIChatResponse(
+        answer=answer
+    )

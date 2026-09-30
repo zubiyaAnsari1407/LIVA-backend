@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from pymongo import ReturnDocument
 
 from database import db
+from project_registry import project_refs, require_project
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -29,17 +30,22 @@ def unavailable():
     )
 
 
-def linked_document(payload):
-    project_id = oid(payload.projectId, "project")
-    project = db.projects.find_one({"_id": project_id})
+def linked_document(payload, require_source=True):
+    project = require_project(payload.projectId)
+    project_id = project["_projectRef"]
 
-    if project is None:
-        raise HTTPException(404, "Project not found.")
-
-    if not payload.isDemo and project.get("isDemo", True):
+    if not payload.isDemo and project.get("isDemo") is True:
         raise HTTPException(
             422,
             "Non-demo records cannot link to a demo project.",
+        )
+
+    if require_source and not payload.isDemo and not project.get("_isLivaProject") and (
+        not payload.sourceName or payload.sourceUrl is None
+    ):
+        raise HTTPException(
+            422,
+            "Source-backed records require a source name and URL.",
         )
 
     document = payload.model_dump(mode="json")
@@ -59,7 +65,7 @@ def linked_document(payload):
                 "Parcel belongs to another project.",
             )
 
-        if not payload.isDemo and parcel.get("isDemo", True):
+        if not payload.isDemo and parcel.get("isDemo") is True:
             raise HTTPException(
                 422,
                 "Non-demo records cannot link to a demo parcel.",
@@ -76,19 +82,7 @@ def decorate(documents):
         for document in documents
     }
 
-    valid_ids = [
-        ObjectId(value)
-        for value in project_ids
-        if ObjectId.is_valid(value)
-    ]
-
-    projects = {
-        str(project["_id"]): project.get("name", "")
-        for project in db.projects.find(
-            {"_id": {"$in": valid_ids}},
-            {"name": 1},
-        )
-    }
+    projects = project_refs(project_ids)
 
     results = []
 
@@ -143,7 +137,8 @@ def list_records(
     query = {}
 
     if project_id:
-        query["projectId"] = str(oid(project_id, "project"))
+        project = require_project(project_id)
+        query["projectId"] = project["_projectRef"]
 
     documents = list(
         db[collection]
@@ -174,7 +169,10 @@ def save_record(collection, payload, record_id=None):
         if existing is None:
             raise HTTPException(404, "Record not found.")
 
-    document = linked_document(payload)
+    document = linked_document(
+        payload,
+        require_source=collection not in {"actions", "compensation", "rehabilitation"},
+    )
 
     if collection == "compensation":
         document.pop("approved")

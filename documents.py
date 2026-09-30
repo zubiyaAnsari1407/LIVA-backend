@@ -3,12 +3,13 @@ from typing import Literal
 from urllib.parse import quote
 
 from bson import ObjectId
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from gridfs import GridFS, NoFile
 from pymongo.errors import PyMongoError
 
 from database import db
+from project_registry import project_refs, require_project
 
 router = APIRouter(prefix="/api/documents", tags=["Documents"])
 files = GridFS(db, collection="document_files")
@@ -66,7 +67,13 @@ def serialize(record: dict, project_name: str) -> dict:
         "contentType": metadata.get("contentType", ""),
         "isDemo": metadata.get("isDemo", True),
         "uploadedAt": record["uploadDate"].isoformat(),
+        "internalOnly": metadata.get("internalOnly", False),
     }
+
+
+def require_staff(role: str) -> None:
+    if role not in {"officer", "admin"}:
+        raise HTTPException(status_code=403, detail="Officer or admin access required.")
 
 
 @router.post("", status_code=201)
@@ -74,13 +81,12 @@ def upload_document(
     projectId: str = Form(...),
     category: Category = Form(...),
     file: UploadFile = File(...),
+    role: str = Header("landowner", alias="X-Liva-Role"),
 ):
     try:
-        project_oid = parse_id(projectId)
-
-        project = db.projects.find_one({"_id": project_oid})
-        if project is None:
-            raise HTTPException(status_code=404, detail="Project not found.")
+        require_staff(role)
+        project = require_project(projectId)
+        project_ref = project["_projectRef"]
 
         data = file.file.read(MAX_SIZE + 1)
 
@@ -101,11 +107,12 @@ def upload_document(
         name = name or "Document"
 
         metadata = {
-            "projectId": str(project_oid),
+            "projectId": str(project_ref),
             "category": category,
             "contentType": content_type,
             "isDemo": project.get("isDemo", True),
             "archived": False,
+            "internalOnly": True,
         }
 
         document_id = files.put(
@@ -117,8 +124,8 @@ def upload_document(
         return {
             "id": str(document_id),
             "name": name,
-            "projectId": str(project_oid),
-            "project": project.get("name", ""),
+            "projectId": str(project_ref),
+            "project": project.get("_projectName", project.get("name", "")),
             "category": category,
             "size": len(data),
             "contentType": content_type,
@@ -137,29 +144,23 @@ def upload_document(
 
 
 @router.get("")
-def list_documents():
+def list_documents(role: str = Header("landowner", alias="X-Liva-Role")):
     try:
-        query = {"metadata.archived": {"$ne": True}}
+        query = {
+            "metadata.archived": {"$ne": True},
+            "metadata.livaWorkflow": {"$ne": True},
+        }
+        if role not in {"officer", "admin"}:
+            query["metadata.internalOnly"] = {"$ne": True}
 
         records = list(
-            file_records.find(query).sort("_id", -1).limit(100)
+            file_records.find(query).sort("_id", -1)
         )
 
-        project_ids = {
-            ObjectId(record["metadata"]["projectId"])
+        project_names = project_refs({
+            str(record.get("metadata", {}).get("projectId", ""))
             for record in records
-            if ObjectId.is_valid(
-                str(record.get("metadata", {}).get("projectId", ""))
-            )
-        }
-
-        project_names = {
-            str(project["_id"]): project.get("name", "")
-            for project in db.projects.find(
-                {"_id": {"$in": list(project_ids)}},
-                {"name": 1},
-            )
-        }
+        })
 
         return {
             "items": [
@@ -182,14 +183,89 @@ def list_documents():
         ) from None
 
 
+@router.get("/workflow")
+def list_project_workflow_documents(
+    projectId: str,
+    role: str = Header("landowner", alias="X-Liva-Role"),
+):
+    require_staff(role)
+    project = require_project(projectId)
+    project_name = project.get("_projectName", project.get("name", "Project"))
+    registration_conditions = [{"livaProjectId": projectId}]
+    source_request_id = project.get("sourceRegistrationRequestId")
+    if source_request_id:
+        registration_conditions.append({"requestId": source_request_id})
+    registration_query = {"$or": registration_conditions}
+
+    try:
+        registrations = list(db["liva_registration_requests"].find(registration_query))
+        grievances = list(db["liva_grievances"].find({"projectId": projectId}))
+        if not project.get("_isLivaProject") and project.get("surveyNumber"):
+            registrations.extend(db["liva_registration_requests"].find({"surveyNumber": project["surveyNumber"]}))
+            grievances.extend(db["liva_grievances"].find({"surveyNumber": project["surveyNumber"], "projectId": {"$in": [None, ""]}}))
+
+        references: list[tuple[dict, str, str]] = []
+        for request in registrations:
+            for field, label in (
+                ("ownershipProof", "Ownership document"),
+                ("landRecord", "Land record"),
+                ("identityProof", "Identity document"),
+            ):
+                reference = request.get(field)
+                if isinstance(reference, dict) and reference.get("fileId"):
+                    references.append((reference, label, f"Registration · {request.get('requestId', '')}"))
+        for grievance in grievances:
+            for reference in grievance.get("supportingDocuments", []):
+                if isinstance(reference, dict) and reference.get("fileId"):
+                    references.append((reference, "Grievance supporting document", f"Grievance · {grievance.get('grievanceId', '')}"))
+
+        items = []
+        seen: set[str] = set()
+        for reference, category, source_label in references:
+            file_id = str(reference["fileId"])
+            if file_id in seen or not ObjectId.is_valid(file_id):
+                continue
+            seen.add(file_id)
+            record = file_records.find_one({
+                "_id": ObjectId(file_id),
+                "metadata.livaWorkflow": True,
+                "metadata.archived": {"$ne": True},
+            })
+            if record is None:
+                continue
+            items.append({
+                "id": file_id,
+                "name": record.get("filename", reference.get("filename", "Document")),
+                "projectId": projectId,
+                "project": project_name,
+                "category": category,
+                "size": record.get("length", reference.get("size", 0)),
+                "contentType": record.get("metadata", {}).get("contentType", reference.get("contentType", "application/pdf")),
+                "isDemo": False,
+                "uploadedAt": record["uploadDate"].isoformat(),
+                "internalOnly": True,
+                "isWorkflow": True,
+                "sourceLabel": source_label,
+            })
+        return {"items": items, "total": len(items)}
+    except PyMongoError:
+        raise HTTPException(status_code=503, detail="Document storage unavailable.") from None
+
+
 @router.get("/{document_id}/file")
-def get_document_file(document_id: str, download: bool = True):
+def get_document_file(
+    document_id: str,
+    download: bool = True,
+    role: str = Header("landowner", alias="X-Liva-Role"),
+):
     oid = parse_id(document_id)
 
     try:
         record = file_records.find_one({
             "_id": oid,
             "metadata.archived": {"$ne": True},
+            "metadata.livaWorkflow": {"$ne": True},
+            **({} if role in {"officer", "admin"} else {"metadata.internalOnly": {"$ne": True}}),
         })
 
         if record is None:
@@ -231,12 +307,19 @@ def get_document_file(document_id: str, download: bool = True):
 
 
 @router.delete("/{document_id}")
-def archive_document(document_id: str):
+def archive_document(
+    document_id: str,
+    role: str = Header("landowner", alias="X-Liva-Role"),
+):
     oid = parse_id(document_id)
 
     try:
+        require_staff(role)
         result = file_records.update_one(
-            {"_id": oid},
+            {
+                "_id": oid,
+                "metadata.archived": {"$ne": True},
+            },
             {
                 "$set": {
                     "metadata.archived": True,

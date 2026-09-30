@@ -84,6 +84,17 @@ class RiskFeatureInput(BaseModel):
         description="District associated with the project",
     )
 
+    available_features: list[str] | None = Field(
+        default=None,
+        description=(
+            "Numeric risk inputs backed by source data. None preserves the "
+            "legacy behavior where all default-valued inputs are available."
+        ),
+    )
+
+    def has_feature(self, name: str) -> bool:
+        return self.available_features is None or name in self.available_features
+
     # --------------------------------------------------------
     # Parcel / acquisition status
     # --------------------------------------------------------

@@ -8,11 +8,11 @@ from pydantic import (
     ConfigDict,
     Field,
     HttpUrl,
-    model_validator,
 )
 from pymongo.errors import PyMongoError
 
 from database import db
+from project_registry import project_refs, require_project
 
 router = APIRouter(prefix="/api/parcels", tags=["Parcels"])
 
@@ -55,21 +55,31 @@ class ParcelCreate(BaseModel):
     sourceRecordId: str | None = Field(default=None, max_length=200)
     sourceDate: date | None = None
 
-    @model_validator(mode="after")
-    def validate_source(self):
-        if not self.isDemo and (
-            not self.sourceName or self.sourceUrl is None
-        ):
-            raise ValueError(
-                "Non-demo records require a source name and source URL."
-            )
-        return self
-
-
-def object_id(value: str) -> ObjectId:
+def parcel_object_id(value: str) -> ObjectId:
     if not ObjectId.is_valid(value):
-        raise HTTPException(status_code=400, detail="Invalid project ID.")
+        raise HTTPException(status_code=400, detail="Invalid parcel ID.")
     return ObjectId(value)
+
+
+def validate_project_for_parcel(payload: ParcelCreate):
+    project = require_project(payload.projectId)
+    project_ref = project["_projectRef"]
+
+    if not payload.isDemo and project.get("isDemo") is True:
+        raise HTTPException(
+            status_code=422,
+            detail="A non-demo parcel cannot be linked to a demo project.",
+        )
+
+    if not payload.isDemo and not project.get("_isLivaProject") and (
+        not payload.sourceName or payload.sourceUrl is None
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Source-backed parcels require a source name and source URL.",
+        )
+
+    return project_ref, project
 
 
 def serialize_parcel(document: dict, project_name: str) -> dict:
@@ -97,31 +107,77 @@ def serialize_parcel(document: dict, project_name: str) -> dict:
 
 @router.post("", status_code=201)
 def create_parcel(payload: ParcelCreate):
-    project_oid = object_id(payload.projectId)
-
     try:
-        project = db.projects.find_one({"_id": project_oid})
-
-        if project is None:
-            raise HTTPException(
-                status_code=404,
-                detail="Project not found. Create the project first.",
-            )
-
-        if not payload.isDemo and project.get("isDemo", True):
-            raise HTTPException(
-                status_code=422,
-                detail="A non-demo parcel cannot be linked to a demo project.",
-            )
+        project_ref, project = validate_project_for_parcel(payload)
 
         document = payload.model_dump(mode="json")
-        document["projectId"] = str(project_oid)
+        document["projectId"] = str(project_ref)
         document["createdAt"] = datetime.now(timezone.utc)
+        document["updatedAt"] = datetime.now(timezone.utc)
 
         result = db.parcels.insert_one(document)
         document["_id"] = result.inserted_id
 
-        return serialize_parcel(document, project.get("name", ""))
+        return serialize_parcel(
+            document,
+            project.get("_projectName", project.get("name", "")),
+        )
+
+    except PyMongoError:
+        raise HTTPException(
+            status_code=503,
+            detail="Database unavailable. Please try again.",
+        ) from None
+
+
+@router.put("/{parcel_id}")
+def update_parcel(parcel_id: str, payload: ParcelCreate):
+    """
+    Update an existing parcel.
+
+    The frontend Edit Parcel form sends the same complete parcel payload
+    used by the create form, so one validated model is used for both.
+    """
+    parcel_oid = parcel_object_id(parcel_id)
+
+    try:
+        existing = db.parcels.find_one({"_id": parcel_oid})
+
+        if existing is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Parcel not found.",
+            )
+
+        project_ref, project = validate_project_for_parcel(payload)
+
+        updated_fields = payload.model_dump(mode="json")
+        updated_fields["projectId"] = str(project_ref)
+        updated_fields["updatedAt"] = datetime.now(timezone.utc)
+
+        result = db.parcels.update_one(
+            {"_id": parcel_oid},
+            {"$set": updated_fields},
+        )
+
+        if result.matched_count == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Parcel not found.",
+            )
+
+        document = db.parcels.find_one({"_id": parcel_oid})
+
+        if document is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Parcel could not be loaded after update.",
+            )
+
+        return serialize_parcel(
+            document,
+            project.get("_projectName", project.get("name", "")),
+        )
 
     except PyMongoError:
         raise HTTPException(
@@ -139,7 +195,8 @@ def list_parcels(
     query = {}
 
     if projectId is not None:
-        query["projectId"] = str(object_id(projectId))
+        project = require_project(projectId)
+        query["projectId"] = project["_projectRef"]
 
     try:
         total = db.parcels.count_documents(query)
@@ -151,19 +208,7 @@ def list_parcels(
             .limit(limit)
         )
 
-        project_ids = {
-            ObjectId(item["projectId"])
-            for item in documents
-            if ObjectId.is_valid(str(item.get("projectId", "")))
-        }
-
-        names = {
-            str(item["_id"]): item.get("name", "")
-            for item in db.projects.find(
-                {"_id": {"$in": list(project_ids)}},
-                {"name": 1},
-            )
-        }
+        names = project_refs({str(item.get("projectId", "")) for item in documents})
 
         return {
             "items": [

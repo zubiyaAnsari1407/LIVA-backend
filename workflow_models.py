@@ -28,17 +28,6 @@ class LinkedRecord(BaseModel):
     sourceUrl: HttpUrl | None = None
     notes: str = Field(default="", max_length=5000)
 
-    @model_validator(mode="after")
-    def require_source(self):
-        if not self.isDemo and (
-            not self.sourceName or not self.sourceUrl
-        ):
-            raise ValueError(
-                "Non-demo records require a source name and URL."
-            )
-        return self
-
-
 class CompensationInput(LinkedRecord):
     reference: str = Field(
         min_length=2,

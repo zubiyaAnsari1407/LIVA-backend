@@ -35,7 +35,7 @@ def build_risk_factors(
     # 1. Pending parcels
     # ========================================================
 
-    if features.pending_parcels > 0:
+    if features.has_feature("pending_parcels") and features.has_feature("total_parcels") and features.pending_parcels > 0:
 
         pending_ratio = _ratio(
             features.pending_parcels,
@@ -65,14 +65,18 @@ def build_risk_factors(
     # 2. Ownership disputes
     # ========================================================
 
+    ownership_disputes_available = features.has_feature("ownership_disputes")
+    ownership_pending_available = features.has_feature("ownership_pending")
     if (
-        features.ownership_disputes > 0
-        or features.ownership_pending > 0
+        (ownership_disputes_available and features.ownership_disputes > 0)
+        or (ownership_pending_available and features.ownership_pending > 0)
     ):
+        observed_disputes = features.ownership_disputes if ownership_disputes_available else 0
+        observed_pending = features.ownership_pending if ownership_pending_available else 0
 
         impact = _cap(
-            (features.ownership_disputes * 2.0)
-            + (features.ownership_pending * 0.75),
+            (observed_disputes * 2.0)
+            + (observed_pending * 0.75),
             15,
         )
 
@@ -81,15 +85,19 @@ def build_risk_factors(
                 code="OWNERSHIP_ISSUES",
                 label="Ownership issues",
                 observed_value=(
-                    features.ownership_disputes
-                    + features.ownership_pending
+                    observed_disputes
+                    + observed_pending
                 ),
                 impact_score=round(impact, 2),
                 direction="INCREASES_RISK",
                 reason=(
-                    f"{features.ownership_disputes} ownership disputes "
-                    f"and {features.ownership_pending} ownership reviews "
-                    "are unresolved."
+                    (
+                        f"{observed_disputes} ownership disputes are unresolved."
+                        if ownership_disputes_available and not ownership_pending_available
+                        else f"{observed_disputes} ownership disputes and {observed_pending} ownership reviews are unresolved."
+                        if ownership_disputes_available
+                        else f"{observed_pending} ownership reviews are unresolved."
+                    )
                 ),
             )
         )
@@ -98,9 +106,9 @@ def build_risk_factors(
     # 3. Survey pending
     # ========================================================
 
-    if features.survey_pending > 0:
+    if features.has_feature("survey_pending") and features.survey_pending > 0:
 
-        if total_parcels > 0:
+        if total_parcels > 0 and features.has_feature("total_parcels"):
 
             survey_ratio = _ratio(
                 features.survey_pending,
@@ -134,14 +142,18 @@ def build_risk_factors(
     # 4. Litigation
     # ========================================================
 
+    active_cases_available = features.has_feature("active_litigation_cases")
+    high_risk_cases_available = features.has_feature("high_risk_litigation_cases")
     if (
-        features.active_litigation_cases > 0
-        or features.high_risk_litigation_cases > 0
+        (active_cases_available and features.active_litigation_cases > 0)
+        or (high_risk_cases_available and features.high_risk_litigation_cases > 0)
     ):
+        active_cases = features.active_litigation_cases if active_cases_available else 0
+        high_risk_cases = features.high_risk_litigation_cases if high_risk_cases_available else 0
 
         impact = _cap(
-            (features.active_litigation_cases * 2.5)
-            + (features.high_risk_litigation_cases * 2.5),
+            (active_cases * 2.5)
+            + (high_risk_cases * 2.5),
             20,
         )
 
@@ -149,11 +161,11 @@ def build_risk_factors(
             RiskFactor(
                 code="LITIGATION",
                 label="Active litigation",
-                observed_value=features.active_litigation_cases,
+                observed_value=active_cases,
                 impact_score=round(impact, 2),
                 direction="INCREASES_RISK",
                 reason=(
-                    f"{features.active_litigation_cases} active "
+                    f"{active_cases} active "
                     "litigation cases may affect acquisition progress."
                 ),
             )
@@ -163,7 +175,7 @@ def build_risk_factors(
     # 5. Missing documents
     # ========================================================
 
-    if features.missing_documents > 0:
+    if features.has_feature("missing_documents") and features.missing_documents > 0:
 
         impact = _cap(
             features.missing_documents * 1.5,
@@ -188,7 +200,7 @@ def build_risk_factors(
     # 6. Compensation pending
     # ========================================================
 
-    if features.compensation_pending > 0:
+    if features.has_feature("compensation_pending") and features.compensation_pending > 0:
 
         impact = _cap(
             features.compensation_pending * 0.75,
@@ -213,7 +225,7 @@ def build_risk_factors(
     # 7. Approvals pending
     # ========================================================
 
-    if features.pending_approvals > 0:
+    if features.has_feature("pending_approvals") and features.pending_approvals > 0:
 
         impact = _cap(
             features.pending_approvals * 1.5,
@@ -238,7 +250,7 @@ def build_risk_factors(
     # 8. Overdue duration
     # ========================================================
 
-    if features.max_overdue_days > 0:
+    if features.has_feature("max_overdue_days") and features.max_overdue_days > 0:
 
         impact = _cap(
             features.max_overdue_days / 6,
@@ -263,15 +275,19 @@ def build_risk_factors(
     # 9. Action centre pressure
     # ========================================================
 
+    overdue_actions_available = features.has_feature("overdue_actions")
+    high_priority_actions_available = features.has_feature("high_priority_open_actions")
     if (
-        features.overdue_actions > 0
-        or features.high_priority_open_actions > 0
+        (overdue_actions_available and features.overdue_actions > 0)
+        or (high_priority_actions_available and features.high_priority_open_actions > 0)
     ):
+        overdue_actions = features.overdue_actions if overdue_actions_available else 0
+        high_priority_actions = features.high_priority_open_actions if high_priority_actions_available else 0
 
         impact = _cap(
-            features.overdue_actions
+            overdue_actions
             + (
-                features.high_priority_open_actions
+                high_priority_actions
                 * 0.5
             ),
             7,
@@ -281,13 +297,17 @@ def build_risk_factors(
             RiskFactor(
                 code="ACTION_PRESSURE",
                 label="Unresolved priority actions",
-                observed_value=features.overdue_actions,
+                observed_value=overdue_actions,
                 impact_score=round(impact, 2),
                 direction="INCREASES_RISK",
                 reason=(
-                    f"{features.overdue_actions} actions are overdue "
-                    f"and {features.high_priority_open_actions} "
-                    "high-priority actions remain open."
+                    (
+                        f"{overdue_actions} actions are overdue and {high_priority_actions} high-priority actions remain open."
+                        if overdue_actions_available and high_priority_actions_available
+                        else f"{overdue_actions} actions are overdue."
+                        if overdue_actions_available
+                        else f"{high_priority_actions} high-priority actions remain open."
+                    )
                 ),
             )
         )
@@ -296,7 +316,7 @@ def build_risk_factors(
     # 10. Low project completion
     # ========================================================
 
-    if features.completion_percentage < 50:
+    if features.has_feature("completion_percentage") and features.completion_percentage < 50:
 
         impact = _cap(
             (

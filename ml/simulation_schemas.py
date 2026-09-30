@@ -142,6 +142,10 @@ class SimulationResponse(BaseModel):
 
 
 class SimulationHistoryItem(BaseModel):
+    current_prediction: RiskPredictionResponse | None = None
+    simulated_prediction: RiskPredictionResponse | None = None
+    summary: str | None = None
+
     simulation_id: str
 
     project_id: str

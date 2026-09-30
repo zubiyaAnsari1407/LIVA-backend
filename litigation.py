@@ -22,7 +22,17 @@ class CaseInput(BaseModel):
 
     projectId: str
     parcelId: str | None = None
+
     title: str = Field(min_length=3, max_length=200)
+    caseType: Literal[
+        "Land acquisition dispute",
+        "Compensation dispute",
+        "Ownership dispute",
+        "Title clarification",
+        "Stay / injunction",
+        "Other",
+    ] = "Land acquisition dispute"
+
     reference: str = Field(min_length=2, max_length=100)
     court: str = Field(min_length=2, max_length=200)
 
@@ -40,6 +50,7 @@ class CaseInput(BaseModel):
     isDemo: bool = True
     sourceName: str | None = Field(default=None, max_length=200)
     sourceUrl: HttpUrl | None = None
+    sourceRecordId: str | None = Field(default=None, max_length=200)
 
     @model_validator(mode="after")
     def validate_record(self):
@@ -117,9 +128,20 @@ def serialize(document: dict, projects: dict) -> dict:
     project_id = str(document.get("projectId", ""))
 
     fields = [
-        "title", "reference", "court", "status",
-        "filedOn", "nextHearing", "officer", "notes",
-        "sourceName", "sourceUrl", "createdAt", "updatedAt",
+        "title",
+        "caseType",
+        "reference",
+        "court",
+        "status",
+        "filedOn",
+        "nextHearing",
+        "officer",
+        "notes",
+        "sourceName",
+        "sourceUrl",
+        "sourceRecordId",
+        "createdAt",
+        "updatedAt",
     ]
 
     return {
