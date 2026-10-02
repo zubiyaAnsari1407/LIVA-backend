@@ -6,6 +6,14 @@ The backend provides APIs for authentication, land registration, document verifi
 
 The backend is built using FastAPI and Python and uses MongoDB as the primary database.
 
+## Live Backend
+
+https://liva-backend-1.onrender.com
+
+## API Documentation
+
+https://liva-backend-1.onrender.com/docs
+
 ---
 
 # 1. Backend Overview
@@ -885,10 +893,4 @@ Predict → Explain → Locate → Simulate → Act → Monitor
 
 ---
 
-## Live Backend
 
-https://liva-backend-1.onrender.com
-
-## API Documentation
-
-https://liva-backend-1.onrender.com/docs
